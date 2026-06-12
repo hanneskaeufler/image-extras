@@ -175,10 +175,15 @@ pub fn register() {
 
         #[cfg(feature = "heic")]
         {
-            register_decoding_hook(
-                "heic".into(),
-                Box::new(|r| Ok(Box::new(heic::HeicDecoder::new(r)?))),
-            );
+            let hook: for<'a> fn(
+                image::hooks::GenericReader<'a>,
+            )
+                -> image::ImageResult<Box<dyn image::ImageDecoder + 'a>> =
+                |r| Ok(Box::new(heic::HeicDecoder::new(r)?));
+            register_decoding_hook("heic".into(), Box::new(hook));
+            register_decoding_hook("HEIC".into(), Box::new(hook));
+            register_decoding_hook("heif".into(), Box::new(hook));
+            register_decoding_hook("HEIF".into(), Box::new(hook));
         }
     });
 }
