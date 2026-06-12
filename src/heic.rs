@@ -14,22 +14,37 @@ pub struct HeicDecoder<R> {
 
 impl<R: BufRead> ImageDecoder for HeicDecoder<R> {
     fn dimensions(&self) -> (u32, u32) {
-        todo!()
+        (self.metadata.width as u32, self.metadata.height as u32)
     }
 
     fn color_type(&self) -> image::ColorType {
-        todo!()
+        image::ColorType::Rgba8
     }
 
     fn read_image(self, buf: &mut [u8]) -> image::ImageResult<()>
     where
         Self: Sized,
     {
-        todo!()
+        assert!(self.total_bytes() == buf.len().try_into().unwrap());
+        assert!(self.img.frame_count() > 0);
+
+        let decoded_img = self
+            .img
+            .decode_image_at_index(self.img.primary_image_index())
+            .map_err(|err| {
+                ImageError::Decoding(DecodingError::new(
+                    ImageFormatHint::PathExtension("heic".into()),
+                    err,
+                ))
+            })?;
+
+        buf.copy_from_slice(&decoded_img.bgra);
+
+        Ok(())
     }
 
     fn read_image_boxed(self: Box<Self>, buf: &mut [u8]) -> image::ImageResult<()> {
-        todo!()
+        (*self).read_image(buf)
     }
 }
 
