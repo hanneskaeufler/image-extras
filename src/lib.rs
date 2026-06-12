@@ -41,6 +41,9 @@ pub mod xbm;
 #[cfg(feature = "xpm")]
 pub mod xpm;
 
+#[cfg(feature = "heic")]
+pub mod heic;
+
 #[allow(unused_imports)]
 use image::hooks::{register_decoding_hook, register_format_detection_hook};
 
@@ -168,6 +171,14 @@ pub fn register() {
             Box::new(|r| Ok(Box::new(xpm::XpmDecoder::new(r)?))),
         ) {
             register_format_detection_hook("xpm".into(), b"/* XPM */", None);
+        }
+
+        #[cfg(feature = "heic")]
+        {
+            register_decoding_hook(
+                "heic".into(),
+                Box::new(|r| Ok(Box::new(heic::HeicDecoder::new(r)?))),
+            );
         }
     });
 }

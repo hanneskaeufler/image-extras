@@ -10,7 +10,7 @@ repository = "https://github.com/image-rs/image-extras"
 include = ["src", "LICENSE-APACHE", "LICENSE-MIT", "README.md"]
 
 [features]
-default = ["dds", "icns", "ora", "otb", "pcx", "sgi", "xbm", "xpm", "wbmp"]
+default = ["dds", "icns", "ora", "otb", "pcx", "sgi", "xbm", "xpm", "wbmp", "heic"]
 
 # Each feature below is the file extension for the file format encoder/decoder
 # it enables.
@@ -23,6 +23,8 @@ pcx = ["dep:pcx"]
 wbmp = ["dep:wbmp"]
 xbm = []
 xpm = []
+imageio = ["dep:imageio"]
+heic = ["dep:imageio"]
 
 
 [dependencies]
@@ -36,6 +38,7 @@ pcx = { version = "0.2.4", optional = true }
 png = { version = "0.18.0", default-features = false, optional = true }
 wbmp = { version = "0.1.2", optional = true }
 zip = { version = "5.1.1", default-features = false, features = ["deflate"], optional = true }
+imageio = { version = "0.9.1", optional = true }
 
 [dev-dependencies]
 image = { version = "0.25.8", default-features = false, features = ["png", "tiff"] }
