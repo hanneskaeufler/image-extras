@@ -23,7 +23,6 @@ pcx = ["dep:pcx"]
 wbmp = ["dep:wbmp"]
 xbm = []
 xpm = []
-imageio = ["dep:imageio"]
 heic = ["dep:imageio"]
 
 
