@@ -184,6 +184,8 @@ pub fn register() {
             register_decoding_hook("HEIC".into(), Box::new(hook));
             register_decoding_hook("heif".into(), Box::new(hook));
             register_decoding_hook("HEIF".into(), Box::new(hook));
+            register_decoding_hook("hif".into(), Box::new(hook));
+            register_decoding_hook("HIF".into(), Box::new(hook));
         }
     });
 }
