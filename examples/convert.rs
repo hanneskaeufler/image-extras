@@ -6,6 +6,9 @@ use std::env;
 use std::error::Error;
 use std::path::Path;
 
+use image::metadata::Orientation;
+use image::{DynamicImage, ImageReader};
+
 fn main() -> Result<(), Box<dyn Error>> {
     image_extras::register();
 
@@ -21,8 +24,33 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Use the open function to load an image from a Path.
     // ```open``` returns a dynamic image.
-    let im = image::open(Path::new(&from)).unwrap();
+    let reader = ImageReader::open(&from)?;
+    let mut decoder = reader.into_decoder()?;
+    use crate::image::ImageDecoder;
+
+    // Get orientation from the decoder first (most reliable path)
+    let orientation = decoder.orientation()?;
+
+    // Also get exif metadata to strip the orientation tag, preventing
+    // double-orientation when saving to formats that carry EXIF (e.g. JPEG)
+    let mut exif = decoder.exif_metadata().unwrap_or(None);
+
+    let mut img = DynamicImage::from_decoder(decoder).unwrap();
+
+    // Prefer decoder-reported orientation, fall back to manual EXIF parsing
+    let effective = if orientation != Orientation::NoTransforms {
+        orientation
+    } else if let Some(ref mut exif) = exif {
+        Orientation::remove_from_exif_chunk(exif).unwrap_or(Orientation::NoTransforms)
+    } else {
+        Orientation::NoTransforms
+    };
+
+    if effective != Orientation::NoTransforms {
+        img.apply_orientation(effective);
+    }
+
     // Write the contents of this image using extension guessing.
-    im.save(Path::new(&into)).unwrap();
+    img.save(Path::new(&into)).unwrap();
     Ok(())
 }
