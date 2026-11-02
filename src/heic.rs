@@ -85,30 +85,6 @@ impl<R: BufRead> ImageDecoder for HeicDecoder<R> {
     }
 }
 
-fn metadata_from_source(source: &ImageSource) -> Result<ImageMetadata, imageio::ImageError> {
-    let frame_count = source.frame_count();
-    if frame_count == 0 {
-        return Err(imageio::ImageError::NoImagesInSource);
-    }
-    let properties = source.properties_at_index(0)?;
-    let width = properties
-        .i64("PixelWidth")?
-        .and_then(|value| usize::try_from(value).ok())
-        .unwrap_or(0);
-    let height = properties
-        .i64("PixelHeight")?
-        .and_then(|value| usize::try_from(value).ok())
-        .unwrap_or(0);
-    let has_alpha = properties.bool("HasAlpha")?.unwrap_or(false);
-    Ok(ImageMetadata {
-        width,
-        height,
-        frame_count,
-        has_alpha,
-        source_format: source.source_type(),
-    })
-}
-
 impl<R> HeicDecoder<R>
 where
     R: BufRead,
@@ -121,7 +97,7 @@ where
                 err,
             ))
         })?;
-        let metadata = metadata_from_source(&source);
+        let metadata = imageio::read_metadata_from_source(&source);
         match (metadata, source) {
             (Ok(metadata), img) => Ok(Self {
                 metadata,
